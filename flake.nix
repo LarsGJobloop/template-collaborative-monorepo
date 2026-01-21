@@ -31,6 +31,7 @@
         # The standard development shell for the project.
         development = pkgs.mkShell {
           packages = with pkgs; [
+            nodejs_24
           ];
         };
       });
