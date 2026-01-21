@@ -1,0 +1,5 @@
+services:
+  hello-world:
+    image: nginx:latest
+    ports:
+      - 80:80
