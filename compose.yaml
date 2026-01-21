@@ -1,4 +1,14 @@
 services:
+  # ============================
+  # = !!! Inhouse Services !!! =
+  # ============================
+  example-web-api-service:
+    build:
+      context: ./src/example-web-api-service
+      dockerfile: Dockerfile
+    ports:
+      - 6000:80
+
   # =============================
   # = !!! Platform Services !!! =
   # =============================
