@@ -35,11 +35,19 @@ jobs:
 
   build-and-push:
     needs: discover-services
-    runs-on: ubuntu-latest
     if: needs.discover-services.outputs.services != '[]'
     strategy:
       matrix:
         service: ${{ fromJson(needs.discover-services.outputs.services) }}
+        platform:
+          - linux/amd64
+          - linux/arm64
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-latest-arm64
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,7 +86,7 @@ jobs:
         with:
           context: ./src/${{ matrix.service }}
           file: ./src/${{ matrix.service }}/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.platform }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
