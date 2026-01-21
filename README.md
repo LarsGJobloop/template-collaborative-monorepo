@@ -80,4 +80,4 @@ The `publish-oci-manifests.yml` workflow automatically:
 - [`src/README.md`](src/README.md) - Source code organization
 - [`infrastructure/README.md`](infrastructure/README.md) - Infrastructure as Code
 - [`project/README.md`](project/README.md) - Project governance
-- [`.github/README.md`](.github/README.md) - GitHub Actions workflows
+- [`.github/WORKFLOWS.md`](.github/WORKFLOWS.md) - GitHub Actions workflows
