@@ -1,0 +1,73 @@
+#cloud-config
+
+packages:
+  - git
+  - curl
+  - ca-certificates
+
+write_files:
+  # Initialize Compose Host
+  - path: /usr/local/bin/initialize-compose-host.sh
+    permissions: 0755
+    encoding: b64
+    content: ${initialize_compose_host_base64}
+
+  - path: /etc/systemd/system/initialize-compose-host.service
+    permissions: 0644
+    content: |
+      [Unit]
+      Description=Initialize Compose Host
+      After=network-online.target
+      Wants=network-online.target
+      ConditionPathExists=!/var/lib/compose-host.initialized
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/bin/initialize-compose-host.sh
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+
+  # Reconcile Compose Application
+  - path: /usr/local/bin/reconcile-compose-deployment.sh
+    permissions: 0755
+    encoding: b64
+    content: ${reconcile_compose_application_base64}
+
+  - path: /etc/systemd/system/reconcile-compose-deployment.service
+    permissions: 0644
+    content: |
+      [Unit]
+      Description=Reconcile Compose Deployment
+      After=initialize-compose-host.service docker.service
+      Requires=initialize-compose-host.service docker.service
+
+      [Service]
+      ExecStart=/usr/local/bin/reconcile-compose-deployment.sh
+      RuntimeDirectory=reconcile-compose
+      RuntimeDirectoryMode=0755
+      ExecStartPre=/usr/bin/flock -n /run/reconcile-compose/lock -c true
+      TimeoutStartSec=10min
+
+  - path: /etc/systemd/system/reconcile-compose-deployment.timer
+    permissions: 0644
+    content: |
+      [Unit]
+      Description=Periodic Reconciliation of Compose Deployment
+
+      [Timer]
+      OnBootSec=30s
+      OnUnitActiveSec=${reconciliation_interval}
+      AccuracySec=5s
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+runcmd:
+  - systemctl daemon-reload
+  - systemctl enable initialize-compose-host.service
+  - systemctl start initialize-compose-host.service
+  - systemctl enable reconcile-compose-deployment.timer
+  - systemctl start reconcile-compose-deployment.timer
