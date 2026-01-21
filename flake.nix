@@ -32,6 +32,7 @@
         development = pkgs.mkShell {
           packages = with pkgs; [
             nodejs_24
+            dotnetCorePackages.sdk_10_0-bin
           ];
         };
       });
