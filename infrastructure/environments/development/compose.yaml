@@ -1,5 +1,18 @@
 services:
-  hello-world:
-    image: nginx:latest
+  # Development environment uses 'latest' tags for convenience
+  # Other environments should hardcode specific versions for traceability
+  
+  example-web-ui-vanilla:
+    image: ghcr.io/larsgjobloop/example-web-ui-vanilla:latest
     ports:
-      - 80:80
+      - 6002:80
+
+  example-web-ui-nextjs:
+    image: ghcr.io/larsgjobloop/example-web-ui-nextjs:latest
+    ports:
+      - 6001:80
+
+  example-web-api-service:
+    image: ghcr.io/larsgjobloop/example-web-api-service:latest
+    ports:
+      - 6000:80
