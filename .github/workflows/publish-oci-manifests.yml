@@ -1,0 +1,85 @@
+name: Publish OCI Manifests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - '.github/workflows/publish-oci-manifests.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-oci-manifests
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  discover-services:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.discover.outputs.services }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Discover services
+        id: discover
+        run: |
+          SERVICES=$(find src -name Dockerfile -type f | sed 's|src/||' | sed 's|/Dockerfile||' | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
+          echo "Found services: $SERVICES"
+
+  build-and-push:
+    needs: discover-services
+    runs-on: ubuntu-latest
+    if: needs.discover-services.outputs.services != '[]'
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.discover-services.outputs.services) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set repository owner
+        id: repo
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          ACTOR=$(echo "${{ github.actor }}" | tr '[:upper:]' '[:lower:]')
+          echo "owner=$OWNER" >> $GITHUB_OUTPUT
+          echo "actor=$ACTOR" >> $GITHUB_OUTPUT
+          echo "Repository owner (normalized): $OWNER"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ steps.repo.outputs.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ steps.repo.outputs.owner }}/${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/${{ matrix.service }}
+          file: ./src/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
