@@ -1,0 +1,38 @@
+<type>: <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+
+# Types:
+#   decision            - Architecture decision record lite
+#   feat(spec)          - Add another testable specification/thesis
+#   feat(impl)          - Implement a specification/thesis
+#   docs                 - Any documentation update
+#   deps                 - Changes in dependencies
+#   chore                - Scaffolding, cleanup, etc
+#   misc                 - Escape hatch
+#
+# Subject line rules:
+#   - Maximum 50 characters
+#   - Use imperative mode ("Add registration spec" not "Added registration spec")
+#   - No period at the end
+#   - Capitalize first letter (unless starting with proper noun/acronym)
+#   - Remember this is the envelope, the commit diff is **the message**, so don't repeat yourself in the subject line.
+#
+# Body rules:
+#   - Optional
+#   - Note what, explain why
+#   - Wrap at 72 characters (recommended)
+#   - Use blank lines to separate paragraphs
+#   - Remember this is the envelope, the commit diff is **the message**, so don't repeat yourself in the body.
+#
+# Footer rules:
+#   - For feat(spec): Reference related decision or thesis with
+#       "Refs: decision <commit-hash>" or "Refs: feat(spec) <commit-hash>"
+#   - For feat(impl): Reference specification with
+#       "Refs: feat(spec) <commit-hash>"
+#   - For decision: Reference related decisions with
+#       "Refs: decision <commit-hash>"
+#   - Use blank lines to separate multiple footer entries
+#   - Optional for other types
