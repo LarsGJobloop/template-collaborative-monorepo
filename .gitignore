@@ -1,2 +1,7 @@
 # Development Environment (Nix Flake Dev Shells & Direnv)
 .direnv
+
+# Infrastructure
+.terraform
+*.tfvars
+*.tfstate*
