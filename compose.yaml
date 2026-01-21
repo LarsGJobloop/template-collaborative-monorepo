@@ -2,6 +2,15 @@ services:
   # ============================
   # = !!! Inhouse Services !!! =
   # ============================
+  # Example Web UI NextJS
+  example-web-ui-nextjs:
+    build:
+      context: ./src/example-web-ui-nextjs
+      dockerfile: Dockerfile
+    ports:
+      - 6001:80
+
+  # Example Web API Service
   example-web-api-service:
     build:
       context: ./src/example-web-api-service
