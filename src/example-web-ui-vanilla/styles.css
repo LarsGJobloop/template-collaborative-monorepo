@@ -1,0 +1,150 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background: #667eea;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Utility Classes */
+.hidden {
+  display: none;
+}
+.flex {
+  display: flex;
+}
+.flex-col {
+  flex-direction: column;
+}
+.grid {
+  display: grid;
+}
+.grid-cols-auto {
+  grid-template-columns: 1fr auto;
+}
+.gap-1 {
+  gap: 0.5rem;
+}
+.gap-2 {
+  gap: 1rem;
+}
+.gap-x-2 {
+  column-gap: 1rem;
+}
+.col-span-full {
+  grid-column: 1 / -1;
+}
+.items-center {
+  align-items: center;
+}
+.justify-center {
+  justify-content: center;
+}
+.inline-block {
+  display: inline-block;
+}
+
+.text-center {
+  text-align: center;
+}
+.text-bold {
+  font-weight: 600;
+}
+.text-sm {
+  font-size: 0.9rem;
+}
+.text-xs {
+  font-size: 0.85rem;
+}
+
+.p-1 {
+  padding: 1rem;
+}
+.p-2 {
+  padding: 2rem;
+}
+.mb-1 {
+  margin-bottom: 1rem;
+}
+.mb-1_5 {
+  margin-bottom: 1.5rem;
+}
+.mt-1 {
+  margin-top: 1rem;
+}
+.m-0 {
+  margin: 0;
+}
+
+.border {
+  border: 1px solid #e0e0e0;
+}
+.rounded {
+  border-radius: 4px;
+}
+.shadow {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.shadow-lg {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.text-gray-300 {
+  color: #333;
+}
+.text-gray-400 {
+  color: #444;
+}
+.text-gray-600 {
+  color: #666;
+}
+.text-red {
+  color: #c33;
+}
+.text-blue {
+  color: #667eea;
+}
+.bg-red-light {
+  background: #fee;
+}
+
+.font-mono {
+  font-family: "Courier New", monospace;
+}
+.bg-transparent {
+  background: transparent;
+}
+.leading-normal {
+  line-height: 1.5;
+}
+.transition {
+  transition: box-shadow 0.2s;
+}
+
+.hover\:shadow:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.list-none {
+  list-style: none;
+}
