@@ -9,6 +9,11 @@ terraform {
       source  = "Valodim/desec"
       version = "0.6.1"
     }
+
+    local = {
+      source  = "hashicorp/local"
+      version = "2.5.1"
+    }
   }
 }
 
