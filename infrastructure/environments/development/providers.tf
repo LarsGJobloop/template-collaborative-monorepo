@@ -4,6 +4,11 @@ terraform {
       source  = "hetznercloud/hcloud"
       version = "1.59.0"
     }
+
+    desec = {
+      source  = "Valodim/desec"
+      version = "0.6.1"
+    }
   }
 }
 
@@ -15,4 +20,14 @@ variable "hcloud_token" {
 
 provider "hcloud" {
   token = var.hcloud_token
+}
+
+variable "desec_token" {
+  description = "DESec API token"
+  type        = string
+  sensitive   = true
+}
+
+provider "desec" {
+  api_token = var.desec_token
 }
