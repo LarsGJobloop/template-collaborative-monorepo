@@ -1,45 +1,5 @@
 services:
   # Development environment uses 'latest' tags for convenience
-  # Other environments should hardcode specific versions for traceability
-  #
-  # Domain Configuration:
-  # The DOMAIN variable is used for Traefik routing. Set it via:
-  # 1. Create a .env file in this directory with: DOMAIN=your-domain.com
-  # 2. Or export DOMAIN=your-domain.com before running docker compose
-  # Docker Compose will automatically load .env files from the same directory
-  
-  ingress:
-    image: traefik:v3.6.7
-    command:
-      - --api.dashboard=true
-      - --api.insecure=true
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
-      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
-      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --log.level=INFO
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik-letsencrypt:/letsencrypt
-    networks:
-      - default
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`ingress.${DOMAIN}`)"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.service=api@internal"
-
   example-web-ui-vanilla:
     image: ghcr.io/larsgjobloop/example-web-ui-vanilla:latest
     labels:
@@ -66,6 +26,3 @@ services:
       - "traefik.http.routers.api-dotnet.entrypoints=websecure"
       - "traefik.http.routers.api-dotnet.tls.certresolver=letsencrypt"
       - "traefik.http.services.api-dotnet.loadbalancer.server.port=80"
-
-volumes:
-  traefik-letsencrypt:
