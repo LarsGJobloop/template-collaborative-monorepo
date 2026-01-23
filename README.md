@@ -20,42 +20,128 @@
 
 A template for managing multiple applications and services in a single repository with infrastructure as code, CI/CD, and deployment automation.
 
-## Structure
+## Repository Structure
 
-- **`src/`** - Source code for applications and services
-- **`infrastructure/`** - Terraform/OpenTofu configurations
-  - **`environments/`** - Environment-specific deployments (development, production)
-  - **`modules/`** - Reusable infrastructure modules
-- **`project/`** - Project-level Terraform (GitHub repository management)
-- **`templates/`** - Project templates for scaffolding new services
-- **`.github/workflows/`** - CI/CD workflows
+```
+.
+├── compose.platform.yaml          # Platform services for local development
+├── compose.yaml                   # Application services for local development
+├── src/                           # Independent services/applications
+│   ├── example-web-api-service/
+│   ├── example-web-ui-nextjs/
+│   └── ...n                       # Additional services
+├── infrastructure/                # Platform configurations (reconciled from repo)
+│   ├── environments/
+│   │   ├── development/
+│   │   │   ├── compose.platform.yaml
+│   │   │   ├── compose.yaml
+│   │   │   └── *.tf
+│   │   └── ...n                   # Additional environments
+│   └── modules/
+│       ├── hetzner-compose-application/
+│       └── ...n                   # Additional modules
+├── project/                       # Project governance and dependencies
+│   └── *.tf
+├── .github/workflows/             # CI/CD flows
+│   └── publish-oci-manifests.yml
+└── templates/                    # Ready-made service templates
+```
+
+**Key Points:**
+- **Root compose files** (`compose.platform.yaml`, `compose.yaml`) - For local development
+- **Environment compose files** (`infrastructure/environments/*/compose.*.yaml`) - Define what gets reconciled in deployed environments
+- **Separation:** Platform services and application services are in separate compose files
+
+## Prerequisites
+
+For infrastructure provisioning and deployment, you'll need:
+
+- **Hetzner Cloud Account** - For hosting servers ([Sign up](https://www.hetzner.com/cloud))
+- **deSEC Account** - For DNS management ([Sign up](https://desec.io/))
+- **Registered Domain Name** - Domain that will be managed by deSEC
 
 ## Quick Start
 
-### Development
+### Local Development
+
+> [!NOTE]
+> No external accounts required! Local development works independently - you can run platform services locally without Hetzner Cloud, deSEC, or domain registration.
+
+For app developers, start the platform services locally to have the same infrastructure available as in deployed environments:
 
 ```sh
 # Enter development shell
 nix develop
 
-# Start local services
-docker compose up
+# Start platform services (Traefik, databases, etc.)
+docker compose -f compose.platform.yaml up
 ```
 
-Services available at:
-- Example API: http://localhost:6000
-- Example Next.js UI: http://localhost:6001
-- Example Vanilla UI: http://localhost:6002
+Platform services provide:
+- **Traefik** - Reverse proxy and load balancer (routing, TLS termination)
+- **PostgreSQL** - Database server
+- **Zitadel** - Identity and access management
+- **Mailpit** - Local SMTP sink for email testing
 
-### Infrastructure
+**Platform Dashboard:** http://ingress.localhost (Traefik dashboard)
+
+### Running Application Services
+
+Application services are defined separately and can be run alongside platform services:
+
+```sh
+# Start application services (requires platform services running)
+docker compose -f compose.yaml up
+
+# Or start everything together
+docker compose -f compose.platform.yaml -f compose.yaml up
+```
+
+**Compose Files:**
+- `compose.platform.yaml` - Platform/infrastructure services (managed by platform team)
+- `compose.yaml` - Application services (managed by app teams)
+
+## Deployed Environment
+
+The development environment runs on Hetzner Cloud (Helsinki). After initial provisioning, it automatically reconciles with the `main` branch every minute, pulling changes and redeploying services as needed.
+
+**Platform Services:**
+- Traefik Dashboard: https://ingress.platform.sandefjord.kodehode.larsgunnar.no
+
+**Application Services:**
+- Example API: https://api-dotnet.platform.sandefjord.kodehode.larsgunnar.no
+- Example Next.js UI: https://ui-nextjs.platform.sandefjord.kodehode.larsgunnar.no
+- Example Vanilla UI: https://ui-vanilla.platform.sandefjord.kodehode.larsgunnar.no
+
+### Initial Infrastructure Setup
+
+For platform/infrastructure teams provisioning environments (one-time setup):
+
+**Required:** Ensure you have the [prerequisites](#prerequisites) (Hetzner Cloud account, deSEC account, and registered domain) configured before proceeding.
 
 ```sh
 # Set up GitHub repository
-cd project && terraform init && terraform apply
+cd project && tofu init && tofu apply
 
-# Deploy to development
-cd infrastructure/environments/development && terraform init && terraform apply
+# Provision development environment (one-time)
+cd infrastructure/environments/development
+
+# Initialize OpenTofu
+tofu init
+
+# Review provisioning plan
+tofu plan
+
+# Provision infrastructure (creates Hetzner Cloud server and initial deployment)
+tofu apply
 ```
+
+After provisioning, the server automatically reconciles with the repository:
+- Pulls compose files from `infrastructure/environments/development/compose.*.yaml`
+- Merges platform and application compose files
+- Redeploys services when changes are detected
+
+**Reconciliation:** Changes pushed to the `main` branch are automatically reconciled and redeployed every minute.
 
 ## CI/CD
 
@@ -65,6 +151,8 @@ The `publish-oci-manifests.yml` workflow automatically:
 - Publishes to GitHub Container Registry: `ghcr.io/<owner>/<service-name>`
 - Tags: `latest`, branch name, and commit SHA
 
+Built images are automatically used when environments reconcile via the compose files in `infrastructure/environments/`.
+
 ## Example Services
 
 - **`example-web-api-service`** - ASP.NET Core API
@@ -73,7 +161,7 @@ The `publish-oci-manifests.yml` workflow automatically:
 
 ## Infrastructure Modules
 
-**`hetzner-compose-application`** - Terraform module for deploying Docker Compose applications to Hetzner Cloud with automated Git-based reconciliation.
+**`hetzner-compose-application`** - OpenTofu module for provisioning Hetzner Cloud servers that automatically reconcile Docker Compose applications from Git repositories. Supports multiple compose files to separate platform and application services. After initial provisioning, the server continuously reconciles with the repository.
 
 ## Documentation
 
