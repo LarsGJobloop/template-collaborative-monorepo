@@ -7,29 +7,70 @@ services:
     build:
       context: ./src/example-web-ui-vanilla
       dockerfile: Dockerfile
-    ports:
-      - 6002:80
+    networks:
+      - platform
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ui-vanilla.rule=Host(`ui-vanilla.${DOMAIN}`)"
+      - "traefik.http.routers.ui-vanilla.entrypoints=web"
+      - "traefik.http.services.ui-vanilla.loadbalancer.server.port=80"
 
   # Example Web UI NextJS
   example-web-ui-nextjs:
     build:
       context: ./src/example-web-ui-nextjs
       dockerfile: Dockerfile
-    ports:
-      - 6001:80
+    networks:
+      - platform
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ui-nextjs.rule=Host(`ui-nextjs.${DOMAIN}`)"
+      - "traefik.http.routers.ui-nextjs.entrypoints=web"
+      - "traefik.http.services.ui-nextjs.loadbalancer.server.port=80"
 
   # Example Web API Service
   example-web-api-service:
     build:
       context: ./src/example-web-api-service
       dockerfile: Dockerfile
-    ports:
-      - 6000:80
+    networks:
+      - platform
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-dotnet.rule=Host(`api-dotnet.${DOMAIN}`)"
+      - "traefik.http.routers.api-dotnet.entrypoints=web"
+      - "traefik.http.services.api-dotnet.loadbalancer.server.port=80"
 
   # =============================
   # = !!! Platform Services !!! =
   # =============================
   # Services down here are those you will likely buy from a SaaS provider.
+
+  # Ingress
+  # -------
+  # Traefik is a modern reverse proxy and load balancer.
+  # It automatically routes traffic to services based on Docker labels.
+  # See: https://doc.traefik.io/traefik/
+  ingress:
+    image: traefik:v3.6.7
+    command:
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --log.level=INFO
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - platform
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`ingress.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.routers.dashboard.service=api@internal"
 
   # Identity Provider
   # -----------------
@@ -236,6 +277,7 @@ services:
     environment:
       MP_SMTP_AUTH: "user:password"
       MP_SMTP_AUTH_ALLOW_INSECURE: true
+      MP_ALLOW_UNTRUSTED_TLS: true
     ports:
       - "1025:1025"
       - "8025:8025"
