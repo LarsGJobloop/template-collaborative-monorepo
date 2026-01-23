@@ -8,6 +8,10 @@ locals {
       description = "Domain name for Traefik routing (e.g., api.platform.${desec_domain.domain.name})"
       value       = "${desec_rrset.rrset-a.subname}.${desec_domain.domain.name}"
     }
+    ACME_EMAIL = {
+      description = "Email address for Let's Encrypt ACME registration"
+      value       = var.acme_email
+    }
   }
 }
 

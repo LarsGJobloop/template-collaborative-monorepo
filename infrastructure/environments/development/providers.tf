@@ -36,3 +36,8 @@ variable "desec_token" {
 provider "desec" {
   api_token = var.desec_token
 }
+
+variable "acme_email" {
+  description = "Email address for Let's Encrypt ACME registration"
+  type        = string
+}
