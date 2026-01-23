@@ -34,7 +34,7 @@ services:
     image: ghcr.io/larsgjobloop/example-web-ui-vanilla:latest
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ui-vanilla.rule=Host(`ui-vanilla.platform.${DOMAIN}`)"
+      - "traefik.http.routers.ui-vanilla.rule=Host(`ui-vanilla.${DOMAIN}`)"
       - "traefik.http.routers.ui-vanilla.entrypoints=web"
       - "traefik.http.services.ui-vanilla.loadbalancer.server.port=80"
 
@@ -42,7 +42,7 @@ services:
     image: ghcr.io/larsgjobloop/example-web-ui-nextjs:latest
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ui-nextjs.rule=Host(`ui-nextjs.platform.${DOMAIN}`)"
+      - "traefik.http.routers.ui-nextjs.rule=Host(`ui-nextjs.${DOMAIN}`)"
       - "traefik.http.routers.ui-nextjs.entrypoints=web"
       - "traefik.http.services.ui-nextjs.loadbalancer.server.port=80"
 
@@ -50,6 +50,6 @@ services:
     image: ghcr.io/larsgjobloop/example-web-api-service:latest
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api-dotnet.rule=Host(`api-dotnet.platform.${DOMAIN}`)"
+      - "traefik.http.routers.api-dotnet.rule=Host(`api-dotnet.${DOMAIN}`)"
       - "traefik.http.routers.api-dotnet.entrypoints=web"
       - "traefik.http.services.api-dotnet.loadbalancer.server.port=80"

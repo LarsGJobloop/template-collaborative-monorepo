@@ -6,7 +6,7 @@ locals {
   env_config = {
     DOMAIN = {
       description = "Domain name for Traefik routing (e.g., api.platform.${desec_domain.domain.name})"
-      value       = desec_domain.domain.name
+      value       = "${desec_rrset.rrset-a.subname}.${desec_domain.domain.name}"
     }
   }
 }
