@@ -1,6 +1,6 @@
 # Hetzner Compose Application Module
 
-A Terraform module for provisioning a Hetzner Cloud server that automatically deploys and reconciles a Docker Compose application from a Git repository.
+An OpenTofu module for provisioning a Hetzner Cloud server that automatically deploys and reconciles a Docker Compose application from a Git repository.
 
 ## Overview
 
@@ -48,8 +48,8 @@ module "my_app" {
   git_repository_url    = "https://github.com/user/repo.git"
   git_repository_branch = "main"
   compose_file_paths    = [
-    "infrastructure/environments/development/compose.platform.yaml"
-    "infrastructure/environments/development/compose.yaml"
+    "compose.platform.yaml"
+    "compose.yaml"
   ]
   reconciliation_interval = "5m"
 
@@ -79,11 +79,11 @@ module "my_app" {
 
 ### Optional
 
-| Name              | Description                                                                                                     | Type     | Default                                                                          |
-|-------------------|-----------------------------------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------------|
-| `admin_ssh_key`   | SSH public key of the admin. A dummy key is used if not provided, and the server is created without SSH access. | `string` | `"ssh-ed25519 0000000000000000000000000000000000000000000000000000000000000000"` |
-| `server_type`     | Type of the server                                                                                              | `string` | `"cpx11"`                                                                        |
-| `server_location` | Location of the server                                                                                          | `string` | `"nbg1"`                                                                         |
+| Name              | Description                                                                                                     | Type     | Default         |
+|-------------------|-----------------------------------------------------------------------------------------------------------------|----------|-----------------|
+| `admin_ssh_key`   | SSH public key of the admin. A dummy key is used if not provided, and the server is created without SSH access. | `string` | `"(dummy key)"` |
+| `server_type`     | Type of the server                                                                                              | `string` | `"cpx11"`       |
+| `server_location` | Location of the server                                                                                          | `string` | `"nbg1"`        |
 
 ## Outputs
 
@@ -117,7 +117,7 @@ The reconciliation process is idempotent and will update the deployment whenever
 
 ## Requirements
 
-- Terraform >= 1.0
+- OpenTofu >= 1.0
 - Hetzner Cloud provider >= 1.58.0
 - Valid Hetzner Cloud API token
 
@@ -127,3 +127,4 @@ The reconciliation process is idempotent and will update the deployment whenever
 - The reconciliation process uses `docker compose up --no-build`, so it expects pre-built images
 - The server image is fixed to `debian-13`
 - SSH access requires providing a valid `admin_ssh_key` variable
+- **Environment files**: Docker Compose automatically loads `.env` files from the same directory as the compose files. Place `.env` files alongside your compose files in the repository to have them automatically loaded during reconciliation
