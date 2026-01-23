@@ -7,7 +7,7 @@ services:
   # 1. Create a .env file in this directory with: DOMAIN=your-domain.com
   # 2. Or export DOMAIN=your-domain.com before running docker compose
   # Docker Compose will automatically load .env files from the same directory
-
+  
   ingress:
     image: traefik:v3.6.7
     command:
@@ -28,7 +28,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-letsencrypt:/letsencrypt
