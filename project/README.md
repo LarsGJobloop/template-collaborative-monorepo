@@ -1,6 +1,6 @@
 # Project
 
-This directory contains Terraform configuration for managing project-level GitHub infrastructure.
+This directory contains OpenTofu configuration for managing project-level GitHub infrastructure.
 
 ## Resources Managed
 
@@ -10,24 +10,20 @@ This directory contains Terraform configuration for managing project-level GitHu
 
 ## Usage
 
-1. **Initialize Terraform**:
+1. **Initialize OpenTofu**:
    ```sh
-   terraform init
+   tofu init
    ```
 
 2. **Review planned changes**:
    ```sh
-   terraform plan
+   tofu plan
    ```
 
 3. **Apply configuration**:
    ```sh
-   terraform apply
+   tofu apply
    ```
-
-> [!NOTE]
->
-> When initializing the IaC providers, not all of them might be locked properly. Meaning running the same command on a different platform requires of the lockfile to work. To minimize this you can explicitly locak the providers across multi
 
 ## Required Variables
 
