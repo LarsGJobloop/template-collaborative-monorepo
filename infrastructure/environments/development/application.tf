@@ -5,9 +5,11 @@ module "application" {
   application_name = "development"
 
   # Application Configuration
-  git_repository_url      = "https://github.com/LarsGJobloop/template-collaborative-monorepo.git"
-  git_repository_branch   = "main"
-  compose_file_path       = "infrastructure/environments/development/compose.yaml"
+  git_repository_url    = "https://github.com/LarsGJobloop/template-collaborative-monorepo.git"
+  git_repository_branch = "main"
+  compose_file_paths = [
+    "infrastructure/environments/development/compose.yaml"
+  ]
   reconciliation_interval = "1m"
 
   # Server Configuration

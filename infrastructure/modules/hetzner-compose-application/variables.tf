@@ -35,9 +35,9 @@ variable "git_repository_branch" {
   type        = string
 }
 
-variable "compose_file_path" {
-  description = "Path of the compose file. From the root of the git repository."
-  type        = string
+variable "compose_file_paths" {
+  description = "List of paths to compose files. From the root of the git repository."
+  type        = list(string)
 }
 
 variable "reconciliation_interval" {

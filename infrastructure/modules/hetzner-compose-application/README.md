@@ -15,6 +15,8 @@ This module creates a Hetzner Cloud server running Debian 13, installs Docker an
 
 ## Usage
 
+### Single Compose File
+
 ```hcl
 module "my_app" {
   source = "./modules/hetzner-compose-application"
@@ -23,7 +25,32 @@ module "my_app" {
   application_name      = "my-application"
   git_repository_url    = "https://github.com/user/repo.git"
   git_repository_branch = "main"
-  compose_file_path     = "docker-compose.yml"
+  compose_file_paths    = ["compose.yaml"]
+  reconciliation_interval = "5m"
+
+  # Optional variables
+  admin_ssh_key    = "ssh-ed25519 AAAA..."
+  server_type      = "cpx11"
+  server_location  = "nbg1"
+}
+```
+
+### Multiple Compose Files
+
+You can specify multiple compose files to separate platform services from application services:
+
+```hcl
+module "my_app" {
+  source = "./modules/hetzner-compose-application"
+
+  # Required variables
+  application_name      = "my-application"
+  git_repository_url    = "https://github.com/user/repo.git"
+  git_repository_branch = "main"
+  compose_file_paths    = [
+    "infrastructure/environments/development/compose.platform.yaml"
+    "infrastructure/environments/development/compose.yaml"
+  ]
   reconciliation_interval = "5m"
 
   # Optional variables
@@ -42,13 +69,13 @@ module "my_app" {
 
 ### Required
 
-| Name                      | Description                                                                                           | Type     |
-|---------------------------|-------------------------------------------------------------------------------------------------------|----------|
-| `application_name`        | Internal name of the application. Used for the server name.                                           | `string` |
-| `git_repository_url`      | URL of the git repository. Only public repositories are supported.                                    | `string` |
-| `git_repository_branch`   | Branch of the git repository                                                                          | `string` |
-| `compose_file_path`       | Path of the compose file from the root of the git repository                                          | `string` |
-| `reconciliation_interval` | Interval for reconciliation (e.g., "5m", "1h"). The reconciliation pulls latest changes and redeploys | `string` |
+| Name                      | Description                                                                                             | Type           |
+|---------------------------|---------------------------------------------------------------------------------------------------------|----------------|
+| `application_name`        | Internal name of the application. Used for the server name.                                             | `string`       |
+| `git_repository_url`      | URL of the git repository. Only public repositories are supported.                                      | `string`       |
+| `git_repository_branch`   | Branch of the git repository                                                                            | `string`       |
+| `compose_file_paths`      | List of paths to compose files from the root of the git repository. Multiple files are merged in order. | `list(string)` |
+| `reconciliation_interval` | Interval for reconciliation (e.g., "5m", "1h"). The reconciliation pulls latest changes and redeploys   | `string`       |
 
 ### Optional
 
@@ -82,7 +109,9 @@ A systemd timer runs periodically (configurable via `reconciliation_interval`) t
 1. Fetches the latest changes from the Git repository
 2. Resets the local repository to match the remote branch
 3. Pulls the latest Docker images
-4. Redeploys the compose application using `docker compose up`
+4. Redeploys the compose application using `docker compose up` with all specified compose files
+
+Multiple compose files are merged together using Docker Compose's `-f` flag, allowing you to separate platform services from application services for better governance and team contributions.
 
 The reconciliation process is idempotent and will update the deployment whenever changes are detected in the repository.
 
