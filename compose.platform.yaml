@@ -89,7 +89,10 @@ services:
       ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: zitadel
       ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
 
-      # Disable password change requirement for initial admin user.
+      # Set up the initial organization with a human admin user.
+      ZITADEL_FIRSTINSTANCE_ORG_NAME: platform
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_USERNAME: admin@platform
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD: Password1!
       ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: false
 
       # Set up a service account with IAM_LOGIN_CLIENT role and write the PAT to a Docker volume
