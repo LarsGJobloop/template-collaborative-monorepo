@@ -98,8 +98,8 @@ services:
       # Domain that will be used to access Zitadel.
       ZITADEL_EXTERNALDOMAIN: zitadel.${DOMAIN}
       # TLS disabled for local development.
-      ZITADEL_EXTERNALPORT: 80
-      ZITADEL_EXTERNALSECURE: false
+      ZITADEL_EXTERNALPORT: 443
+      ZITADEL_EXTERNALSECURE: true
       ZITADEL_TLS_ENABLED: false
 
       # Database connection settings.
@@ -149,8 +149,8 @@ services:
       # Domain that will be used to access Zitadel.
       ZITADEL_EXTERNALDOMAIN: zitadel.${DOMAIN}
       # TLS disabled for local development.
-      ZITADEL_EXTERNALPORT: 80
-      ZITADEL_EXTERNALSECURE: false
+      ZITADEL_EXTERNALPORT: 443
+      ZITADEL_EXTERNALSECURE: true
       ZITADEL_TLS_ENABLED: false
 
       # Database connection settings.
@@ -194,9 +194,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.zitadel.rule=Host(`zitadel.${DOMAIN}`) && !PathPrefix(`/ui/v2/login`)"
-      - "traefik.http.routers.zitadel.entrypoints=web"
+      - "traefik.http.routers.zitadel.entrypoints=websecure"
+      - "traefik.http.routers.zitadel.tls.certresolver=letsencrypt"
       - "traefik.http.services.zitadel.loadbalancer.passHostHeader=true"
       - "traefik.http.services.zitadel.loadbalancer.server.url=h2c://zitadel:8080"
+      
 
   login:
     restart: unless-stopped
@@ -218,7 +220,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.login.rule=Host(`zitadel.${DOMAIN}`) && PathPrefix(`/ui/v2/login`)"
-      - "traefik.http.routers.login.entrypoints=web"
+      - "traefik.http.routers.login.entrypoints=websecure"
+      - "traefik.http.routers.login.tls.certresolver=letsencrypt"
       - "traefik.http.services.login.loadbalancer.passHostHeader=true"
       - "traefik.http.services.login.loadbalancer.server.url=http://zitadel:3000"
 
