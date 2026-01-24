@@ -46,5 +46,217 @@ services:
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       - "traefik.http.routers.dashboard.service=api@internal"
 
+  # Identity Provider
+  # -----------------
+  # Zitadel is an open-source identity and access management solution.
+  # It allows you to manage users, groups, and permissions for your application.
+  # This can be done either through an UI or through a API (IaC).
+  # See: https://zitadel.com/docs/intro
+  # We are using the multi-phase initialization process to control the database creation and migration.
+  # Steps:
+  # 1. Creates the Zitadel database, service user and base tables
+  # 2. Creates the derived tables and initializes the login client
+  # 3. Starts service the Zitadel API and Login UI
+  zitadel-init:
+    restart: no
+    image: ghcr.io/zitadel/zitadel:v4.9.0
+    command: init
+    environment:
+      # Database connection settings.
+      ZITADEL_DATABASE_POSTGRES_HOST: database
+      ZITADEL_DATABASE_POSTGRES_PORT: 5432
+      # Database to use for Zitadel.
+      ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
+      # Database admin credentials.
+      ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME: postgres
+      ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD: postgres
+      ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE: disable
+      # Credentials for Zitadel service user.
+      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
+
+    healthcheck:
+      test:
+        - CMD
+        - /app/zitadel
+        - ready
+      interval: 10s
+      timeout: 60s
+      retries: 5
+    volumes:
+      - ./.tmp/zitadel:/current-dir:delegated
+    depends_on:
+      database:
+        condition: service_healthy
+
+  zitadel-setup:
+    restart: no
+    image: ghcr.io/zitadel/zitadel:v4.9.0
+    command: setup --masterkey "MasterkeyNeedsToHave32Characters"
+    environment:
+      # Domain that will be used to access Zitadel.
+      ZITADEL_EXTERNALDOMAIN: zitadel.${DOMAIN}
+      # TLS disabled for local development.
+      ZITADEL_EXTERNALPORT: 80
+      ZITADEL_EXTERNALSECURE: false
+      ZITADEL_TLS_ENABLED: false
+
+      # Database connection settings.
+      ZITADEL_DATABASE_POSTGRES_HOST: database
+      # Database credentials for Zitadel service user.
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
+
+      # Disable password change requirement for initial admin user.
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: false
+
+      # Set up a service account with IAM_LOGIN_CLIENT role and write the PAT to the file ./login-client.pat
+      ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH: /current-dir/login-client.pat
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_USERNAME: login-client
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_NAME: Automatically Initialized IAM_LOGIN_CLIENT
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_PAT_EXPIRATIONDATE: "2029-01-01T00:00:00Z"
+
+      # Configure the login v2 features.
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_REQUIRED: true
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI: /ui/v2/login
+      ZITADEL_OIDC_DEFAULTLOGINURLV2: /ui/v2/login/login?authRequest=
+      ZITADEL_OIDC_DEFAULTLOGOUTURLV2: /ui/v2/login/logout?post_logout_redirect=
+      ZITADEL_SAML_DEFAULTLOGINURLV2: /ui/v2/login/login?samlRequest=
+
+    healthcheck:
+      test:
+        - CMD
+        - /app/zitadel
+        - ready
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./.tmp/zitadel:/current-dir:delegated
+    depends_on:
+      zitadel-init:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+
+  zitadel:
+    restart: no
+    image: ghcr.io/zitadel/zitadel:v4.9.0
+    command: start --masterkey "MasterkeyNeedsToHave32Characters"
+    environment:
+      # Domain that will be used to access Zitadel.
+      ZITADEL_EXTERNALDOMAIN: zitadel.${DOMAIN}
+      # TLS disabled for local development.
+      ZITADEL_EXTERNALPORT: 80
+      ZITADEL_EXTERNALSECURE: false
+      ZITADEL_TLS_ENABLED: false
+
+      # Database connection settings.
+      ZITADEL_DATABASE_POSTGRES_HOST: database
+      # Database credentials for Zitadel service user.
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
+
+      # Disable password change requirement for initial admin user.
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: false
+
+      # Set up a service account with IAM_LOGIN_CLIENT role and write the PAT to the file ./login-client.pat
+      ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH: /current-dir/login-client.pat
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_USERNAME: login-client
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_NAME: Automatically Initialized IAM_LOGIN_CLIENT
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_PAT_EXPIRATIONDATE: "2029-01-01T00:00:00Z"
+
+      # Configure the login v2 features.
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_REQUIRED: true
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI: /ui/v2/login
+      ZITADEL_OIDC_DEFAULTLOGINURLV2: /ui/v2/login/login?authRequest=
+      ZITADEL_OIDC_DEFAULTLOGOUTURLV2: /ui/v2/login/logout?post_logout_redirect=
+      ZITADEL_SAML_DEFAULTLOGINURLV2: /ui/v2/login/login?samlRequest=
+
+    healthcheck:
+      test:
+        - CMD
+        - /app/zitadel
+        - ready
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./.tmp/zitadel:/current-dir:delegated
+    depends_on:
+      zitadel-setup:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zitadel.rule=Host(`zitadel.${DOMAIN}`) && !PathPrefix(`/ui/v2/login`)"
+      - "traefik.http.routers.zitadel.entrypoints=web"
+      - "traefik.http.services.zitadel.loadbalancer.passHostHeader=true"
+      - "traefik.http.services.zitadel.loadbalancer.server.url=h2c://zitadel:8080"
+
+  login:
+    restart: unless-stopped
+    image: ghcr.io/zitadel/zitadel-login:latest
+    environment:
+      - CUSTOM_REQUEST_HEADERS=Host:zitadel.${DOMAIN}
+      - ZITADEL_API_URL=http://zitadel:8080
+      - NEXT_PUBLIC_BASE_PATH=/ui/v2/login
+      - ZITADEL_SERVICE_USER_TOKEN_FILE=/current-dir/login-client.pat
+      - NODE_ENV=dev
+    network_mode: service:zitadel
+    user: "0"
+    volumes:
+      - ./.tmp/zitadel:/current-dir:delegated
+    depends_on:
+      zitadel:
+        condition: service_healthy
+        restart: false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.login.rule=Host(`zitadel.${DOMAIN}`) && PathPrefix(`/ui/v2/login`)"
+      - "traefik.http.routers.login.entrypoints=web"
+      - "traefik.http.services.login.loadbalancer.passHostHeader=true"
+      - "traefik.http.services.login.loadbalancer.server.url=http://zitadel:3000"
+
+  # Database
+  # ---------
+  # PostgreSQL is an open-source relational database management system.
+  # It allows you to create databases, tables, and store and query data using a SQL language.
+  # See: https://www.postgresql.org/
+  database:
+    image: postgres:17
+    ports:
+      - 5432:5432
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # SMTP Sink
+  # ---------
+  # Mailpit is a local SMTP sink for testing email sending.
+  # Zitadel requires Email verification for account creation.
+  # See: https://github.com/axllent/mailpit
+  mailpit:
+    image: axllent/mailpit:latest
+    environment:
+      MP_SMTP_AUTH: "user:password"
+      MP_SMTP_AUTH_ALLOW_INSECURE: true
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   traefik-letsencrypt:
+  database-data:
