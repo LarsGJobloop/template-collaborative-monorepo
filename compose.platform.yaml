@@ -66,8 +66,6 @@ services:
       interval: 10s
       timeout: 60s
       retries: 5
-    volumes:
-      - ./.tmp/zitadel:/current-dir:delegated
     depends_on:
       database:
         condition: service_healthy
@@ -76,6 +74,7 @@ services:
     restart: no
     image: ghcr.io/zitadel/zitadel:v4.9.0
     command: setup --masterkey "MasterkeyNeedsToHave32Characters"
+    user: "0"
     environment:
       # Domain that will be used to access Zitadel.
       ZITADEL_EXTERNALDOMAIN: zitadel.${DOMAIN}
@@ -93,8 +92,8 @@ services:
       # Disable password change requirement for initial admin user.
       ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: false
 
-      # Set up a service account with IAM_LOGIN_CLIENT role and write the PAT to the file ./login-client.pat
-      ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH: /current-dir/login-client.pat
+      # Set up a service account with IAM_LOGIN_CLIENT role and write the PAT to a Docker volume
+      ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH: /zitadel-data/login-client.pat
       ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_USERNAME: login-client
       ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_NAME: Automatically Initialized IAM_LOGIN_CLIENT
       ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_PAT_EXPIRATIONDATE: "2029-01-01T00:00:00Z"
@@ -116,7 +115,7 @@ services:
       retries: 5
       start_period: 10s
     volumes:
-      - ./.tmp/zitadel:/current-dir:delegated
+      - zitadel-data:/zitadel-data
     depends_on:
       zitadel-init:
         condition: service_completed_successfully
@@ -144,12 +143,6 @@ services:
       # Disable password change requirement for initial admin user.
       ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: false
 
-      # Set up a service account with IAM_LOGIN_CLIENT role and write the PAT to the file ./login-client.pat
-      ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH: /current-dir/login-client.pat
-      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_USERNAME: login-client
-      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_NAME: Automatically Initialized IAM_LOGIN_CLIENT
-      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_PAT_EXPIRATIONDATE: "2029-01-01T00:00:00Z"
-
       # Configure the login v2 features.
       ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_REQUIRED: true
       ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI: /ui/v2/login
@@ -166,8 +159,6 @@ services:
       timeout: 60s
       retries: 5
       start_period: 10s
-    volumes:
-      - ./.tmp/zitadel:/current-dir:delegated
     depends_on:
       zitadel-setup:
         condition: service_completed_successfully
@@ -187,12 +178,11 @@ services:
       - CUSTOM_REQUEST_HEADERS=Host:zitadel.${DOMAIN}
       - ZITADEL_API_URL=http://zitadel:8080
       - NEXT_PUBLIC_BASE_PATH=/ui/v2/login
-      - ZITADEL_SERVICE_USER_TOKEN_FILE=/current-dir/login-client.pat
+      - ZITADEL_SERVICE_USER_TOKEN_FILE=/zitadel-data/login-client.pat
       - NODE_ENV=dev
     network_mode: service:zitadel
-    user: "0"
     volumes:
-      - ./.tmp/zitadel:/current-dir:delegated
+      - zitadel-data:/zitadel-data:ro
     depends_on:
       zitadel:
         condition: service_healthy
@@ -241,6 +231,7 @@ services:
 
 volumes:
   database-data:
+  zitadel-data:
 
 networks:
   default:
