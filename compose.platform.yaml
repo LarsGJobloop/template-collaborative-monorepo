@@ -77,37 +77,34 @@ services:
     image: ghcr.io/zitadel/zitadel:v4.9.0
     command: setup --masterkey "MasterkeyNeedsToHave32Characters"
     environment:
-      # See "What's next" to learn about how to serve Zitadel on a different domain or IP.
-      ZITADEL_EXTERNALDOMAIN: localhost
-
-      # See "What's next" to learn about how to enable TLS.
+      # Domain that will be used to access Zitadel.
+      ZITADEL_EXTERNALDOMAIN: zitadel.${DOMAIN}
+      # TLS disabled for local development.
+      ZITADEL_EXTERNALPORT: 80
       ZITADEL_EXTERNALSECURE: false
       ZITADEL_TLS_ENABLED: false
 
       # Database connection settings.
       ZITADEL_DATABASE_POSTGRES_HOST: database
-      ZITADEL_DATABASE_POSTGRES_PORT: 5432
-      ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
-      # Credentials for Zitadel service user.
-      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: zitadel
+      # Database credentials for Zitadel service user.
       ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: zitadel
       ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
 
-      # By configuring a login client, the setup job creates a user of type machine with the role IAM_LOGIN_CLIENT.
-      # It writes a PAT to the path specified in ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH.
-      # The PAT is passed to the login container via the environment variable ZITADEL_SERVICE_USER_TOKEN_FILE.
-      ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH: /current-dir/login-client.pat
+      # Disable password change requirement for initial admin user.
       ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: false
+
+      # Set up a service account with IAM_LOGIN_CLIENT role and write the PAT to the file ./login-client.pat
+      ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH: /current-dir/login-client.pat
       ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_USERNAME: login-client
       ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_NAME: Automatically Initialized IAM_LOGIN_CLIENT
       ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_PAT_EXPIRATIONDATE: "2029-01-01T00:00:00Z"
 
       # Configure the login v2 features.
       ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_REQUIRED: true
-      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI: http://localhost:3000/ui/v2/login
-      ZITADEL_OIDC_DEFAULTLOGINURLV2: http://localhost:3000/ui/v2/login/login?authRequest=
-      ZITADEL_OIDC_DEFAULTLOGOUTURLV2: http://localhost:3000/ui/v2/login/logout?post_logout_redirect=
-      ZITADEL_SAML_DEFAULTLOGINURLV2: http://localhost:3000/ui/v2/login/login?samlRequest=
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI: /ui/v2/login
+      ZITADEL_OIDC_DEFAULTLOGINURLV2: /ui/v2/login/login?authRequest=
+      ZITADEL_OIDC_DEFAULTLOGOUTURLV2: /ui/v2/login/logout?post_logout_redirect=
+      ZITADEL_SAML_DEFAULTLOGINURLV2: /ui/v2/login/login?samlRequest=
 
     healthcheck:
       test:
@@ -131,31 +128,34 @@ services:
     image: ghcr.io/zitadel/zitadel:v4.9.0
     command: start --masterkey "MasterkeyNeedsToHave32Characters"
     environment:
-      # See "What's next" to learn about how to serve Zitadel on a different domain or IP.
-      ZITADEL_EXTERNALDOMAIN: localhost
-
-      # See "What's next" to learn about how to enable TLS.
+      # Domain that will be used to access Zitadel.
+      ZITADEL_EXTERNALDOMAIN: zitadel.${DOMAIN}
+      # TLS disabled for local development.
+      ZITADEL_EXTERNALPORT: 80
       ZITADEL_EXTERNALSECURE: false
       ZITADEL_TLS_ENABLED: false
 
       # Database connection settings.
       ZITADEL_DATABASE_POSTGRES_HOST: database
-      ZITADEL_DATABASE_POSTGRES_PORT: 5432
-      ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
-      # Zitadel service user credentials.
-      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: zitadel
+      # Database credentials for Zitadel service user.
       ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: zitadel
       ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
 
-      # SMTP Configuration
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_HOST: mailpit:1025
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_USER: user
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_PASSWORD: password
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_TLS: false
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_FROM: "no-reply@localhost"
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_FROMNAME: "No Reply"
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_REPLYTOADDRESS: "no-reply@localhost"
-      ZITADEL_DEFAULTINSTANCE_DOMAINPOLICY_SMTPSENDERADDRESSMATCHESINSTANCEDOMAIN: false
+      # Disable password change requirement for initial admin user.
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: false
+
+      # Set up a service account with IAM_LOGIN_CLIENT role and write the PAT to the file ./login-client.pat
+      ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH: /current-dir/login-client.pat
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_USERNAME: login-client
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_NAME: Automatically Initialized IAM_LOGIN_CLIENT
+      ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_PAT_EXPIRATIONDATE: "2029-01-01T00:00:00Z"
+
+      # Configure the login v2 features.
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_REQUIRED: true
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI: /ui/v2/login
+      ZITADEL_OIDC_DEFAULTLOGINURLV2: /ui/v2/login/login?authRequest=
+      ZITADEL_OIDC_DEFAULTLOGOUTURLV2: /ui/v2/login/logout?post_logout_redirect=
+      ZITADEL_SAML_DEFAULTLOGINURLV2: /ui/v2/login/login?samlRequest=
 
     healthcheck:
       test:
@@ -168,23 +168,27 @@ services:
       start_period: 10s
     volumes:
       - ./.tmp/zitadel:/current-dir:delegated
-    ports:
-      - 8080:8080
-      - 3000:3000
     depends_on:
       zitadel-setup:
         condition: service_completed_successfully
       database:
         condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zitadel.rule=Host(`zitadel.${DOMAIN}`) && !PathPrefix(`/ui/v2/login`)"
+      - "traefik.http.routers.zitadel.entrypoints=web"
+      - "traefik.http.services.zitadel.loadbalancer.passHostHeader=true"
+      - "traefik.http.services.zitadel.loadbalancer.server.url=h2c://zitadel:8080"
 
   login:
     restart: unless-stopped
     image: ghcr.io/zitadel/zitadel-login:latest
-    # If you can't use the network_mode service:zitadel, you can pass the environment variables ZITADEL_API_URL=http://zitadel:8080 and CUSTOM_REQUEST_HEADERS=Host:localhost instead.
     environment:
-      - ZITADEL_API_URL=http://localhost:8080
+      - CUSTOM_REQUEST_HEADERS=Host:zitadel.${DOMAIN}
+      - ZITADEL_API_URL=http://zitadel:8080
       - NEXT_PUBLIC_BASE_PATH=/ui/v2/login
       - ZITADEL_SERVICE_USER_TOKEN_FILE=/current-dir/login-client.pat
+      - NODE_ENV=dev
     network_mode: service:zitadel
     user: "0"
     volumes:
@@ -193,6 +197,12 @@ services:
       zitadel:
         condition: service_healthy
         restart: false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.login.rule=Host(`zitadel.${DOMAIN}`) && PathPrefix(`/ui/v2/login`)"
+      - "traefik.http.routers.login.entrypoints=web"
+      - "traefik.http.services.login.loadbalancer.passHostHeader=true"
+      - "traefik.http.services.login.loadbalancer.server.url=http://zitadel:3000"
 
   # Database
   # ---------
