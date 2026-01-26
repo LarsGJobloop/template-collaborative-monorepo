@@ -1,5 +1,14 @@
 services:
   # Development environment uses 'latest' tags for convenience
+  landing-page:
+    image: ghcr.io/larsgjobloop/landing-page:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.landing-page.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.landing-page.entrypoints=websecure"
+      - "traefik.http.routers.landing-page.tls.certresolver=letsencrypt"
+      - "traefik.http.services.landing-page.loadbalancer.server.port=80"
+
   example-web-ui-vanilla:
     image: ghcr.io/larsgjobloop/example-web-ui-vanilla:latest
     labels:
