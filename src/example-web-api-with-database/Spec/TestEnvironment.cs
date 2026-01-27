@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Spec;
 
-public class TestEnvironment : IDisposable, IClassFixture<WebApplicationFactory<Program>>
+public class TestEnvironment : IClassFixture<WebApplicationFactory<Program>>
 {
 
     private readonly WebApplicationFactory<Program> _factory;
@@ -15,10 +15,5 @@ public class TestEnvironment : IDisposable, IClassFixture<WebApplicationFactory<
     public HttpClient NewClient()
     {
         return _factory.CreateClient();
-    }
-
-    public void Dispose()
-    {
-        _factory.Dispose();
     }
 }
