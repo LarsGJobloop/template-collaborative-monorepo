@@ -5,12 +5,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers();
 
-var connectionString = builder.Configuration["ConnectionStrings:Commentary"]
-    ?? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
+// Prioritize environment variable over configuration file
+var connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
+    ?? builder.Configuration["ConnectionStrings:Commentary"];
 if (string.IsNullOrEmpty(connectionString))
 {
     throw new Exception("POSTGRES_CONNECTION_STRING is not set");
 }
+
+// Debug: Log connection string (masking password)
+var maskedConnectionString = connectionString.Contains('@') 
+    ? connectionString.Substring(0, connectionString.IndexOf('@') + 1) + "***@***"
+    : connectionString;
+Console.WriteLine($"Using connection string: {maskedConnectionString}");
+
 builder.Services.AddDbContextPool<CommentaryContext>(options =>
     options.UseNpgsql(connectionString));
 

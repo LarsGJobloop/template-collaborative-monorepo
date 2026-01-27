@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="Api/Api.csproj" />
+  <Project Path="Init/Init.csproj" />
   <Project Path="Spec/Spec.csproj" />
 </Solution>

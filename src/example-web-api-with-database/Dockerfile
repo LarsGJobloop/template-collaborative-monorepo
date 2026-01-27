@@ -10,14 +10,27 @@ RUN dotnet restore
 
 RUN dotnet publish \
     --configuration Release \
-    --output /app \
+    --output /app/Init \
+    --no-restore \
+    Init
+
+RUN dotnet publish \
+    --configuration Release \
+    --output /app/Api \
     --no-restore \
     Api
 
-# Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION} AS runtime
+# Init runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION} AS init-runtime
 WORKDIR /app
-COPY --from=build /app ./
+COPY --from=build /app/Init ./
+
+ENTRYPOINT ["dotnet", "Init.dll"]
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION} AS api-runtime
+WORKDIR /app
+COPY --from=build /app/Api ./
 
 # Standardized ports for the service
 ENV ASPNETCORE_HTTP_PORTS=80
