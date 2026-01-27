@@ -1,0 +1,2 @@
+# Non-Windows related MSBuild garbage
+bin\\*
