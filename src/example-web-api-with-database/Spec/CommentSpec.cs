@@ -21,13 +21,18 @@ public static class CommentFactory
         return [.. Enumerable.Range(0, count).Select(_ => RandomCommentCreateRequest())];
     }
 
-    public static async Task SeedComments(HttpClient client, params CommentCreateRequest[] commentRequests)
+    public static async Task<Comment[]> SeedComments(HttpClient client, params CommentCreateRequest[] commentRequests)
     {
+        var comments = new List<Comment>();
         foreach (var commentRequest in commentRequests)
         {
-            var response = await client.PostAsync("/comments", JsonContent.Create(commentRequest));
+            var response = await client.PostAsJsonAsync("/comments", commentRequest);
             response.EnsureSuccessStatusCode();
+            var comment = await response.Content.ReadFromJsonAsync<Comment>();
+            Assert.NotNull(comment);
+            comments.Add(comment);
         }
+        return [.. comments];
     }
 }
 
@@ -90,13 +95,13 @@ public class CommentaryListSpec(WebApplicationFactory<Program> factory) : TestEn
         var comments = await response.Content.ReadFromJsonAsync<Comment[]>();
         Assert.NotNull(comments);
         Assert.Equal(expectedReturned, comments.Length);
-        
+
         // Verify LIFO ordering: newest comments first (reverse of creation order)
         var expectedComments = commentRequests
             .TakeLast(expectedReturned)
             .Reverse()
             .ToArray();
-            
+
         for (int i = 0; i < expectedComments.Length; i++)
         {
             Assert.Equal(expectedComments[i].Content, comments[i].Content);

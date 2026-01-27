@@ -1,57 +1,58 @@
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Spec;
 
 public class TestEnvironment : IClassFixture<WebApplicationFactory<Program>>, IAsyncLifetime
 {
-
-    private readonly WebApplicationFactory<Program> _factory;
-    private WebApplicationFactory<Program>? _currentFactory;
+    private readonly ServiceDependencies _services;
+    private WebApplicationFactory<Program> _factory = null!;
 
     public TestEnvironment(WebApplicationFactory<Program> factory)
     {
-        _factory = factory;
-        _currentFactory = factory;
+        _services = new ServiceDependencies();
     }
 
-    public HttpClient NewClient()
+    // 1. Extracting API Clients
+    public HttpClient NewClient() => _factory.CreateClient();
+
+    // 2. Resetting the Application
+    public HttpClient ResetApp()
     {
-        return _currentFactory!.CreateClient();
+        _factory.Dispose();
+        _factory = CreateConfiguredFactory();
+        return _factory.CreateClient();
     }
 
-    public void Kill()
+    // 3. Resetting the Database
+    public async Task ResetDatabase()
     {
-        if (_currentFactory != null && _currentFactory != _factory)
-        {
-            _currentFactory.Dispose();
-        }
-        _currentFactory = null;
+        await _services.ResetPostgreSQL();
     }
 
-    public HttpClient Start()
+    // 4. Configuring the Application
+    private WebApplicationFactory<Program> CreateConfiguredFactory()
     {
-        // Always create a fresh factory to simulate server restart
-        if (_currentFactory != null && _currentFactory != _factory)
-        {
-            _currentFactory.Dispose();
-        }
-        _currentFactory = new WebApplicationFactory<Program>();
-        return _currentFactory.CreateClient();
+        var connectionString = _services.GetDatabaseConnectionString();
+
+        return new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.UseSetting("POSTGRES_CONNECTION_STRING", connectionString);
+            });
     }
 
     public async Task InitializeAsync()
     {
-        // Reset the comment store before each test
-        using var scope = _factory.Services.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<CommentStore>();
-        store.Clear();
-        await Task.CompletedTask;
+        // Initialize database
+        await _services.InitializePostgreSQL();
+
+        // Create configured factory with database connection
+        _factory = CreateConfiguredFactory();
     }
 
-    public Task DisposeAsync()
+    public async Task DisposeAsync()
     {
-        Kill();
-        return Task.CompletedTask;
+        _factory.Dispose();
+        await _services.DisposeAsync();
     }
 }
