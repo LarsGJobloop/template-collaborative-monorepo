@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
+using System.Linq;
 using System.Net.Http.Json;
 
 namespace Spec;
@@ -69,71 +70,37 @@ public class CommentaryRequestSpec(WebApplicationFactory<Program> factory) : Tes
 [Collection("Querys Operations")]
 public class CommentaryListSpec(WebApplicationFactory<Program> factory) : TestEnvironment(factory)
 {
-    [Fact]
-    public async Task GivenExistingComments_WhenTheLatestCommentsAreRequested_ThenTheLatestCommentsAreReturned()
+    [Theory]
+    [InlineData(5, 5)]   // Few comments - all returned
+    [InlineData(10, 10)] // Exactly enough - all returned
+    [InlineData(15, 10)] // Many comments - limit to 10
+    public async Task GivenExistingComments_WhenTheLatestCommentsAreRequested_ThenTheLatestCommentsAreReturnedInLIFOOrder(
+        int commentCount, int expectedReturned)
     {
-        await ExpectFailure.Run("Not yet implemented", async () =>
+        // Given existing comments
+        var client = NewClient();
+        var commentRequests = CommentFactory.GetRandomCommentCreateRequests(commentCount);
+        await CommentFactory.SeedComments(client, commentRequests);
+
+        // When the latest comments are requested
+        var response = await client.GetAsync("/comments");
+        response.EnsureSuccessStatusCode();
+
+        // Then the latest comments are returned in LIFO order (newest first)
+        var comments = await response.Content.ReadFromJsonAsync<Comment[]>();
+        Assert.NotNull(comments);
+        Assert.Equal(expectedReturned, comments.Length);
+        
+        // Verify LIFO ordering: newest comments first (reverse of creation order)
+        var expectedComments = commentRequests
+            .TakeLast(expectedReturned)
+            .Reverse()
+            .ToArray();
+            
+        for (int i = 0; i < expectedComments.Length; i++)
         {
-            // Given existing comments
-            var client = NewClient();
-            var commentRequests = CommentFactory.GetRandomCommentCreateRequests(10);
-            await CommentFactory.SeedComments(client, commentRequests);
-
-            // When the latest comments are requested
-            var response = await client.GetAsync("/comments");
-            response.EnsureSuccessStatusCode();
-
-            // Then the latest comments are returned
-            var comments = await response.Content.ReadFromJsonAsync<Comment[]>();
-            Assert.NotNull(comments);
-            Assert.Equal(commentRequests.Length, comments.Length);
-            for (int i = 0; i < comments.Length; i++)
-            {
-                Assert.Equal(commentRequests[i].Content, comments[i].Content);
-                Assert.Equal(commentRequests[i].Alias, comments[i].Alias);
-            }
-        });
-    }
-
-    [Fact]
-    public async Task GivenAFewExistingComments_WhenClientsRequestTheLatestComments_ThenAllCommentsAreReturned()
-    {
-        await ExpectFailure.Run("Not yet implemented", async () =>
-        {
-            // Given existing comments
-            var client = NewClient();
-            var commentRequests = CommentFactory.GetRandomCommentCreateRequests(5);
-            await CommentFactory.SeedComments(client, commentRequests);
-
-            // When clients request the latest comments
-            var response = await client.GetAsync("/comments");
-            response.EnsureSuccessStatusCode();
-
-            // Then all comments are returned
-            var comments = await response.Content.ReadFromJsonAsync<Comment[]>();
-            Assert.NotNull(comments);
-            Assert.Equal(commentRequests.Length, comments.Length);
-        });
-    }
-
-    [Fact]
-    public async Task GivenManyExistingComments_WhenClientsRequestTheLatestComments_ThenNoMoreThanTenAreReturned()
-    {
-        await ExpectFailure.Run("Not yet implemented", async () =>
-        {
-            // Given existing comments
-            var client = NewClient();
-            var commentRequests = CommentFactory.GetRandomCommentCreateRequests(15);
-            await CommentFactory.SeedComments(client, commentRequests);
-
-            // When clients request the latest comments
-            var response = await client.GetAsync("/comments");
-            response.EnsureSuccessStatusCode();
-
-            // Then no more than 10 comments are returned
-            var comments = await response.Content.ReadFromJsonAsync<Comment[]>();
-            Assert.NotNull(comments);
-            Assert.True(comments.Length <= 10, "No more than 10 comments should be returned");
-        });
+            Assert.Equal(expectedComments[i].Content, comments[i].Content);
+            Assert.Equal(expectedComments[i].Alias, comments[i].Alias);
+        }
     }
 }
