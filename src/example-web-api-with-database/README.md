@@ -40,13 +40,11 @@ The init service accepts:
 
 The main service uses:
 
-- `POSTGRES_CONNECTION_STRING` - Full connection string for EF Core
-
-### Connection String Format
-
-```
-Host=database;Port=5432;Database=commentary;Username=commentary;Password=commentary
-```
+- `POSTGRES_HOST` - Database host (default: `database`)
+- `POSTGRES_PORT` - Database port (default: `5432`)
+- `POSTGRES_DATABASE` - Database name (required)
+- `POSTGRES_USER` - Database user (required)
+- `POSTGRES_PASSWORD` - Database password (required)
 
 ## Migrations
 
