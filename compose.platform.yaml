@@ -235,6 +235,3 @@ services:
 volumes:
   database-data:
   zitadel-data:
-
-networks:
-  default:
