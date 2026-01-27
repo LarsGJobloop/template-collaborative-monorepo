@@ -5,19 +5,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers();
 
-// Prioritize environment variable over configuration file
-var connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
-    ?? builder.Configuration["ConnectionStrings:Commentary"];
-if (string.IsNullOrEmpty(connectionString))
+// Build connection string from individual environment variables
+var requiredVars = new Dictionary<string, string?>
 {
-    throw new Exception("POSTGRES_CONNECTION_STRING is not set");
+    { "POSTGRES_HOST", Environment.GetEnvironmentVariable("POSTGRES_HOST") },
+    { "POSTGRES_PORT", Environment.GetEnvironmentVariable("POSTGRES_PORT") },
+    { "POSTGRES_DATABASE", Environment.GetEnvironmentVariable("POSTGRES_DATABASE") },
+    { "POSTGRES_USER", Environment.GetEnvironmentVariable("POSTGRES_USER") },
+    { "POSTGRES_PASSWORD", Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") },
+};
+
+var missingVars = requiredVars
+    .Where(kv => string.IsNullOrWhiteSpace(kv.Value))
+    .Select(kv => kv.Key)
+    .ToList();
+
+if (missingVars.Count != 0)
+{
+    throw new Exception($"Missing required environment variables: {string.Join(", ", missingVars)}");
 }
 
-// Debug: Log connection string (masking password)
-var maskedConnectionString = connectionString.Contains('@') 
-    ? connectionString.Substring(0, connectionString.IndexOf('@') + 1) + "***@***"
-    : connectionString;
-Console.WriteLine($"Using connection string: {maskedConnectionString}");
+var host = requiredVars["POSTGRES_HOST"]!;
+var port = int.Parse(requiredVars["POSTGRES_PORT"]!);
+var database = requiredVars["POSTGRES_DATABASE"]!;
+var user = requiredVars["POSTGRES_USER"]!;
+var password = requiredVars["POSTGRES_PASSWORD"]!;
+
+var connectionString = $"Host={host};Port={port};Database={database};Username={user};Password={password}";
 
 builder.Services.AddDbContextPool<CommentaryContext>(options =>
     options.UseNpgsql(connectionString));

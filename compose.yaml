@@ -76,7 +76,11 @@ services:
       dockerfile: Dockerfile
       target: api-runtime
     environment:
-      POSTGRES_CONNECTION_STRING: "Host=database;Port=5432;Database=commentary;Username=commentary;Password=commentary"
+      POSTGRES_HOST: database
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: commentary
+      POSTGRES_USER: commentary
+      POSTGRES_PASSWORD: commentary
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.commentary.rule=Host(`commentary.${DOMAIN}`)"
