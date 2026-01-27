@@ -51,5 +51,18 @@ services:
       - "traefik.http.routers.api-dotnet.entrypoints=web"
       - "traefik.http.services.api-dotnet.loadbalancer.server.port=80"
 
+  # Example Web API with database
+  commentary-service:
+    build:
+      context: ./src/example-web-api-with-database
+      dockerfile: Dockerfile
+    networks:
+      - platform
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.commentary.rule=Host(`commentary.${DOMAIN}`)"
+      - "traefik.http.routers.commentary.entrypoints=web"
+      - "traefik.http.services.commentary.loadbalancer.server.port=80"
+
 networks:
   platform:
