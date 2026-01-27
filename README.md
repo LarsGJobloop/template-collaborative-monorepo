@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://larsgunnar.no">
+  <a href="https://platform.sandefjord.kodehode.larsgunnar.no">
     <img alt="Logo" src="./assets/logo/logo.svg" height="128">
   </a>
   <h1>Collaborative Monorepo Template</h1>
@@ -12,11 +12,11 @@
   </div>
 
   <div>
+    <a href="https://platform.sandefjord.kodehode.larsgunnar.no"><img alt="Website" src="https://img.shields.io/website?url=https%3A%2F%2Fplatform.sandefjord.kodehode.larsgunnar.no&up_message=UP&up_color=7ccf00&down_message=DOWN&down_color=e7000b&style=for-the-badge&logo=docker&logoColor=e60076&label=Platform&labelColor=441306"></a>
     <a href="https://github.com/LarsGJobloop/template-collaborative-monorepo/actions/workflows/publish-oci-manifests.yml"><img alt="OCI Manifests" src="https://img.shields.io/github/actions/workflow/status/LarsGJobloop/template-collaborative-monorepo/publish-oci-manifests.yml?branch=main&style=for-the-badge&label=OCI%20Manifests&labelColor=441306"></a>
     <a href="https://github.com/LarsGJobloop/template-collaborative-monorepo"><img alt="Repository Status" src="https://img.shields.io/github/last-commit/LarsGJobloop/template-collaborative-monorepo?style=for-the-badge&label=Last%20Updated&labelColor=441306"></a>
   </div>
 </div>
-
 
 A template for managing multiple applications and services in a single repository with infrastructure as code, CI/CD, and deployment automation.
 
@@ -48,6 +48,7 @@ A template for managing multiple applications and services in a single repositor
 ```
 
 **Key Points:**
+
 - **Root compose files** (`compose.platform.yaml`, `compose.yaml`) - For local development
 - **Environment compose files** (`infrastructure/environments/*/compose.*.yaml`) - Define what gets reconciled in deployed environments
 - **Separation:** Platform services and application services are in separate compose files
@@ -78,6 +79,7 @@ docker compose -f compose.platform.yaml up
 ```
 
 Platform services provide:
+
 - **Traefik** - Reverse proxy and load balancer (routing, TLS termination)
 - **PostgreSQL** - Database server
 - **Zitadel** - Identity and access management
@@ -98,6 +100,7 @@ docker compose -f compose.platform.yaml -f compose.yaml up
 ```
 
 **Compose Files:**
+
 - `compose.platform.yaml` - Platform/infrastructure services (managed by platform team)
 - `compose.yaml` - Application services (managed by app teams)
 
@@ -106,9 +109,11 @@ docker compose -f compose.platform.yaml -f compose.yaml up
 The development environment runs on Hetzner Cloud (Helsinki). After initial provisioning, it automatically reconciles with the `main` branch every minute, pulling changes and redeploying services as needed.
 
 **Platform Services:**
+
 - Traefik Dashboard: https://ingress.platform.sandefjord.kodehode.larsgunnar.no
 
 **Application Services:**
+
 - Example API: https://api-dotnet.platform.sandefjord.kodehode.larsgunnar.no
 - Example Next.js UI: https://ui-nextjs.platform.sandefjord.kodehode.larsgunnar.no
 - Example Vanilla UI: https://ui-vanilla.platform.sandefjord.kodehode.larsgunnar.no
@@ -137,6 +142,7 @@ tofu apply
 ```
 
 After provisioning, the server automatically reconciles with the repository:
+
 - Pulls compose files from `infrastructure/environments/development/compose.*.yaml`
 - Merges platform and application compose files
 - Redeploys services when changes are detected
@@ -146,6 +152,7 @@ After provisioning, the server automatically reconciles with the repository:
 ## CI/CD
 
 The `publish-oci-manifests.yml` workflow automatically:
+
 - Discovers services with Dockerfiles in `src/`
 - Builds multi-platform images (`linux/amd64`, `linux/arm64`)
 - Publishes to GitHub Container Registry: `ghcr.io/<owner>/<service-name>`
