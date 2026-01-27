@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Api;
 
 namespace Spec;
 
@@ -48,6 +51,11 @@ public class TestEnvironment : IClassFixture<WebApplicationFactory<Program>>, IA
 
         // Create configured factory with database connection
         _factory = CreateConfiguredFactory();
+
+        // Clear database before each test
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<CommentaryContext>();
+        await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Comments\"");
     }
 
     public async Task DisposeAsync()

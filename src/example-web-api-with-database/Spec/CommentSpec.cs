@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
-using System.Linq;
 using System.Net.Http.Json;
 
 namespace Spec;
@@ -36,7 +35,7 @@ public static class CommentFactory
     }
 }
 
-[Collection("CRUD Operations")]
+[Collection("Database Tests")]
 public class CommentaryRequestSpec(WebApplicationFactory<Program> factory) : TestEnvironment(factory)
 {
     [Fact]
@@ -72,12 +71,11 @@ public class CommentaryRequestSpec(WebApplicationFactory<Program> factory) : Tes
     }
 }
 
-[Collection("Querys Operations")]
+[Collection("Database Tests")]
 public class CommentaryListSpec(WebApplicationFactory<Program> factory) : TestEnvironment(factory)
 {
     [Theory]
-    // TODO: Uncomment this when DB is cleaned up between tests
-    // [InlineData(5, 5)]   // Few comments - all returned
+    [InlineData(5, 5)]   // Few comments - all returned
     [InlineData(10, 10)] // Exactly enough - all returned
     [InlineData(15, 10)] // Many comments - limit to 10
     public async Task GivenExistingComments_WhenTheLatestCommentsAreRequested_ThenTheLatestCommentsAreReturnedInLIFOOrder(
