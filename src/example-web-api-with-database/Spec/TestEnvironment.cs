@@ -7,15 +7,37 @@ public class TestEnvironment : IClassFixture<WebApplicationFactory<Program>>, IA
 {
 
     private readonly WebApplicationFactory<Program> _factory;
+    private WebApplicationFactory<Program>? _currentFactory;
 
     public TestEnvironment(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
+        _currentFactory = factory;
     }
 
     public HttpClient NewClient()
     {
-        return _factory.CreateClient();
+        return _currentFactory!.CreateClient();
+    }
+
+    public void Kill()
+    {
+        if (_currentFactory != null && _currentFactory != _factory)
+        {
+            _currentFactory.Dispose();
+        }
+        _currentFactory = null;
+    }
+
+    public HttpClient Start()
+    {
+        // Always create a fresh factory to simulate server restart
+        if (_currentFactory != null && _currentFactory != _factory)
+        {
+            _currentFactory.Dispose();
+        }
+        _currentFactory = new WebApplicationFactory<Program>();
+        return _currentFactory.CreateClient();
     }
 
     public async Task InitializeAsync()
@@ -27,5 +49,9 @@ public class TestEnvironment : IClassFixture<WebApplicationFactory<Program>>, IA
         await Task.CompletedTask;
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public Task DisposeAsync()
+    {
+        Kill();
+        return Task.CompletedTask;
+    }
 }
