@@ -9,6 +9,12 @@ resource "github_branch_protection" "main" {
   required_pull_request_reviews {
     required_approving_review_count = 0
 
+    # Only allow project owner to dismiss reviews.
+    # This is to prevent abuse of the dismissal feature.
+    dismissal_restrictions = [
+      "/${local.owner}"
+    ]
+
     # Dismiss stale reviews automatically when new commits are pushed.
     dismiss_stale_reviews = true
 
@@ -42,4 +48,7 @@ resource "github_branch_protection" "main" {
   # Apply the same rules to administrators as to other users.
   # This ensures that administrators cannot bypass the protection rules.
   enforce_admins = true
+
+  # We don't require signed handoffs of commits.
+  require_signed_commits = false
 }

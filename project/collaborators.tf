@@ -2,6 +2,8 @@ locals {
   # =======================================
   # = NOTE! Usernames are case-sensitive! =
   # =======================================
+  owner = "LarsGJobloop"
+
   administrators = [
     # NOTE! Repository Owner always has admin access
     "zabronax",
