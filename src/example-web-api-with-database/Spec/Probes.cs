@@ -2,21 +2,16 @@
 
 namespace Spec;
 
-public class HealthProbeSpec : IClassFixture<WebApplicationFactory<Program>>
+public class HealthProbeSpec : TestEnvironment
 {
 
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public HealthProbeSpec(WebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-    }
+    public HealthProbeSpec(WebApplicationFactory<Program> factory) : base(factory) { }
 
     [Fact]
     public async Task GivenAHealthyService_WhenTheProbeIsCalled_ThenTheResponseIsOK()
     {
         // Given a healthy service
-        var client = _factory.CreateClient();
+        var client = NewClient();
         // When the probe is called
         var response = await client.GetAsync("/healthz");
         // Then the response is a success status code
