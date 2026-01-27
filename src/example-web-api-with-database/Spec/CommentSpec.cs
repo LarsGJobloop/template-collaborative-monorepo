@@ -36,22 +36,19 @@ public class CommentaryRequestSpec(WebApplicationFactory<Program> factory) : Tes
     [Fact]
     public async Task GivenAValidComment_WhenTheCommentIsRecived_ThenTheCommentIsReturned()
     {
-        await ExpectFailure.Run("Not yet implemented", async () =>
-        {
-            // Given a valid comment
-            var client = NewClient();
-            var validCommentCreateRequest = CommentFactory.RandomCommentCreateRequest();
+        // Given a valid comment
+        var client = NewClient();
+        var validCommentCreateRequest = CommentFactory.RandomCommentCreateRequest();
 
-            // When the comment is received
-            var response = await client.PostAsync("/comments", JsonContent.Create(validCommentCreateRequest));
-            response.EnsureSuccessStatusCode();
+        // When the comment is received
+        var response = await client.PostAsync("/comments", JsonContent.Create(validCommentCreateRequest));
+        response.EnsureSuccessStatusCode();
 
-            // Then the comment is returned
-            var comment = await response.Content.ReadFromJsonAsync<Comment>();
-            Assert.NotNull(comment);
-            Assert.Equal(validCommentCreateRequest.Content, comment.Content);
-            Assert.Equal(validCommentCreateRequest.Alias, comment.Alias);
-        });
+        // Then the comment is returned
+        var comment = await response.Content.ReadFromJsonAsync<Comment>();
+        Assert.NotNull(comment);
+        Assert.Equal(validCommentCreateRequest.Content, comment.Content);
+        Assert.Equal(validCommentCreateRequest.Alias, comment.Alias);
     }
 
     [Fact]
