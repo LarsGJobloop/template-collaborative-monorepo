@@ -1,0 +1,46 @@
+# Default owners for the repository
+# Platform team owns everything by default unless overridden below
+* @LarsGJobloop
+
+# ==========================================
+# Platform Team Ownership
+# ==========================================
+# Platform team owns infrastructure, templates, and core configuration
+
+/infrastructure/ @LarsGJobloop
+/templates/ @LarsGJobloop
+/compose.platform.yaml @LarsGJobloop
+/compose.yaml @LarsGJobloop
+/.env @LarsGJobloop
+/.github/ @LarsGJobloop
+/.gitignore @LarsGJobloop
+
+# ==========================================
+# Service Owners
+# ==========================================
+# Each service has independent owners
+# Update these as service teams are established
+# or services are added
+
+/src/example-web-api-service/ @LarsGJobloop
+/src/example-web-ui-nextjs/ @LarsGJobloop
+/src/example-web-ui-vanilla/ @LarsGJobloop
+/src/landing-page/ @LarsGJobloop
+
+# ==========================================
+# Shared Ownership
+# ==========================================
+# These paths are shared across teams
+
+/docs/ @LarsGJobloop
+/assets/ @LarsGJobloop
+/README.md @LarsGJobloop
+
+# ==========================================
+# Internal/Tooling Files
+# ==========================================
+# Development tooling - explicit ownership
+
+/flake.nix @LarsGJobloop
+/flake.lock @LarsGJobloop
+/.envrc @LarsGJobloop

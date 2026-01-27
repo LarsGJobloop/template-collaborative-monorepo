@@ -1,0 +1,15 @@
+# Admin/Owner Only Files
+# This file restricts access to admin-only files
+# Only administrators should be able to approve changes to these paths
+
+# CODEOWNERS override file itself
+/.github/CODEOWNERS @LarsGJobloop
+
+# License
+/LICENSE @LarsGJobloop
+
+# Project configuration (collaborators, repository settings)
+/project/ @LarsGJobloop
+
+# Change workflow
+/.gitmessage @LarsGJobloop
