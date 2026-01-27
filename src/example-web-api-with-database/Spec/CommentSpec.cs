@@ -54,18 +54,15 @@ public class CommentaryRequestSpec(WebApplicationFactory<Program> factory) : Tes
     [Fact]
     public async Task GivenAnInvalidComment_WhenTheCommentIsSent_AnErrorWithTheDocumentationLinkIsReturned()
     {
-        await ExpectFailure.Run("Not yet implemented", async () =>
-        {
-            // Given an invalid comment
-            var client = NewClient();
-            var invalidCommentCreateRequest = new CommentCreateRequest("", "");
+        // Given an invalid comment
+        var client = NewClient();
+        var invalidCommentCreateRequest = new CommentCreateRequest("", "");
 
-            // When the comment is received
-            var response = await client.PostAsync("/comments", JsonContent.Create(invalidCommentCreateRequest));
-            Assert.False(response.IsSuccessStatusCode);
-            // And the response indicate a client error
-            Assert.Equal(StatusCodes.Status400BadRequest, (int)response.StatusCode);
-        });
+        // When the comment is received
+        var response = await client.PostAsync("/comments", JsonContent.Create(invalidCommentCreateRequest));
+        Assert.False(response.IsSuccessStatusCode);
+        // And the response indicate a client error
+        Assert.Equal(StatusCodes.Status400BadRequest, (int)response.StatusCode);
     }
 }
 

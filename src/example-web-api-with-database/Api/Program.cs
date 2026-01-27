@@ -10,6 +10,11 @@ app.MapHealthChecks("/healthz");
 
 app.MapPost("/comments", (CommentCreateRequest request) =>
 {
+    if (string.IsNullOrWhiteSpace(request.Content) || string.IsNullOrWhiteSpace(request.Alias))
+    {
+        return Results.BadRequest();
+    }
+
     var comment = new Comment(
         Id: Guid.NewGuid(),
         Content: request.Content,
