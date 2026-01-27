@@ -1,10 +1,45 @@
-# Development Environment (Nix Flake Dev Shells & Direnv)
+# ===========================
+# = Development Environment =
+# ===========================
+# Direnv
 .direnv
 
+# ==================
+# = Infrastructure =
+# ==================
 # Infrastructure
 .terraform
 *.tfvars
 *.tfstate*
 
-# Temporary files
-.tmp
+# ===================
+# = C# & .NET files =
+# ===================
+bin
+obj
+
+# =================
+# = Node.js files =
+# =================
+# dependencies
+node_modules
+
+# testing
+scoverage
+
+# next.js
+.next
+out
+
+# production
+build
+
+# debug
+npm-debug.log*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
