@@ -23,6 +23,7 @@
 # or services are added
 
 /src/example-web-api-service/ @LarsGJobloop
+/src/example-web-api-with-database/ @LarsGJobloop
 /src/example-web-ui-nextjs/ @LarsGJobloop
 /src/example-web-ui-vanilla/ @LarsGJobloop
 /src/landing-page/ @LarsGJobloop
