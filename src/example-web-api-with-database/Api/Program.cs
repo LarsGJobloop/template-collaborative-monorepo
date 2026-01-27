@@ -1,48 +1,44 @@
-using System.Linq;
-using System.Text.Json;
+using Api;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers();
-builder.Services.AddSingleton<CommentStore>();
+
+var connectionString = builder.Configuration["ConnectionStrings:Commentary"]
+    ?? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new Exception("POSTGRES_CONNECTION_STRING is not set");
+}
+builder.Services.AddDbContextPool<CommentaryContext>(options =>
+    options.UseNpgsql(connectionString));
+
+builder.Services.AddScoped<CommentaryService>();
 
 var app = builder.Build();
 
+// Apply migrations on every startup
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<CommentaryContext>();
+    context.Database.Migrate();
+}
+
 app.MapHealthChecks("/healthz");
 
-app.MapPost("/comments", (CommentCreateRequest request, CommentStore store) =>
+app.MapPost("/comments", async (CommentCreateRequest request, CommentaryService service) =>
 {
     if (string.IsNullOrWhiteSpace(request.Content) || string.IsNullOrWhiteSpace(request.Alias))
     {
         return Results.BadRequest();
     }
 
-    var comment = new Comment(
-        Id: Guid.NewGuid(),
-        Content: request.Content,
-        Alias: request.Alias
-    );
-    store.Add(comment);
+    var comment = new Comment(request);
+    await service.Add(comment);
     return Results.Ok(comment);
 });
 
-app.MapGet("/comments", (CommentStore store) => store.GetAll());
+app.MapGet("/comments", (CommentaryService service) => Results.Ok(service.GetAll()));
 
 app.Run();
-
-public record CommentCreateRequest(string Content, string Alias);
-public record Comment(Guid Id, string Content, string Alias);
-
-public class CommentStore
-{
-    private readonly List<Comment> _comments = new();
-    
-    public void Add(Comment comment) => _comments.Add(comment);
-    
-    public Comment[] GetAll() => _comments
-        .TakeLast(10)
-        .Reverse()
-        .ToArray();
-    
-    public void Clear() => _comments.Clear();
-}
