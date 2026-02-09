@@ -250,8 +250,15 @@ services:
       MP_SMTP_AUTH: "user:password"
       MP_SMTP_AUTH_ALLOW_INSECURE: true
     ports:
+      # Port 1025 is exposed directly for SMTP delivery
       - "1025:1025"
-      - "8025:8025"
+      # Port 8025 is exposed through Traefik for the web dashboard
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailpit.rule=Host(`mailpit.${DOMAIN}`)"
+      - "traefik.http.routers.mailpit.entrypoints=websecure"
+      - "traefik.http.routers.mailpit.tls.certresolver=letsencrypt"
+      - "traefik.http.services.mailpit.loadbalancer.server.port=8025"
 
 volumes:
   traefik-letsencrypt:

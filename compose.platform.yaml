@@ -229,8 +229,14 @@ services:
       MP_SMTP_AUTH: "user:password"
       MP_SMTP_AUTH_ALLOW_INSECURE: true
     ports:
+      # Port 1025 is exposed directly for SMTP delivery (required by Zitadel)
       - "1025:1025"
-      - "8025:8025"
+      # Port 8025 is exposed through Traefik for the web dashboard
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailpit.rule=Host(`mailpit.${DOMAIN}`)"
+      - "traefik.http.routers.mailpit.entrypoints=web"
+      - "traefik.http.services.mailpit.loadbalancer.server.port=8025"
 
 volumes:
   database-data:

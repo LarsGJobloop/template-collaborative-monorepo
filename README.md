@@ -85,7 +85,9 @@ Platform services provide:
 - **Zitadel** - Identity and access management
 - **Mailpit** - Local SMTP sink for email testing
 
-**Platform Dashboard:** http://ingress.localhost (Traefik dashboard)
+**Platform Dashboards:**
+- Traefik: http://ingress.localhost
+- Mailpit: http://mailpit.localhost (email testing dashboard)
 
 ### Running Application Services
 
@@ -111,6 +113,7 @@ The development environment runs on Hetzner Cloud (Helsinki). After initial prov
 **Platform Services:**
 
 - Traefik Dashboard: https://ingress.platform.sandefjord.kodehode.larsgunnar.no
+- Mailpit Dashboard: https://mailpit.platform.sandefjord.kodehode.larsgunnar.no
 
 **Application Services:**
 
