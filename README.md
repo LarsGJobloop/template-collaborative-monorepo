@@ -18,6 +18,10 @@
   </div>
 </div>
 
+> [!NOTE]
+>
+> **Public server is currently offline.** The deployed environment has been taken down. Local development continues to work - see the [Local Development](#local-development) section below.
+
 A template for managing multiple applications and services in a single repository with infrastructure as code, CI/CD, and deployment automation.
 
 ## Repository Structure
@@ -86,7 +90,9 @@ Platform services provide:
 - **Mailpit** - Local SMTP sink for email testing
 
 **Platform Dashboards:**
+
 - Traefik: http://ingress.localhost
+- Zitadel: http://zitadel.localhost (identity and access management)
 - Mailpit: http://mailpit.localhost (email testing dashboard)
 
 ### Running Application Services
@@ -108,20 +114,24 @@ docker compose -f compose.platform.yaml -f compose.yaml up
 
 ## Deployed Environment
 
-The development environment runs on Hetzner Cloud (Helsinki). After initial provisioning, it automatically reconciles with the `main` branch every minute, pulling changes and redeploying services as needed.
+> [!NOTE]
+> **Public server is currently offline.** The deployed environment has been taken down. Local development continues to work as described in the [Local Development](#local-development) section above.
 
-**Platform Services:**
+~~The development environment runs on Hetzner Cloud (Helsinki). After initial provisioning, it automatically reconciles with the `main` branch every minute, pulling changes and redeploying services as needed.~~
 
-- Traefik Dashboard: https://ingress.platform.sandefjord.kodehode.larsgunnar.no
-- Mailpit Dashboard: https://mailpit.platform.sandefjord.kodehode.larsgunnar.no
+~~**Platform Services:**~~
+~~- Traefik Dashboard: https://ingress.platform.sandefjord.kodehode.larsgunnar.no~~
+~~- Mailpit Dashboard: https://mailpit.platform.sandefjord.kodehode.larsgunnar.no~~
 
-**Application Services:**
-
-- Example API: https://api-dotnet.platform.sandefjord.kodehode.larsgunnar.no
-- Example Next.js UI: https://ui-nextjs.platform.sandefjord.kodehode.larsgunnar.no
-- Example Vanilla UI: https://ui-vanilla.platform.sandefjord.kodehode.larsgunnar.no
+~~**Application Services:**~~
+~~- Example API: https://api-dotnet.platform.sandefjord.kodehode.larsgunnar.no~~
+~~- Example Next.js UI: https://ui-nextjs.platform.sandefjord.kodehode.larsgunnar.no~~
+~~- Example Vanilla UI: https://ui-vanilla.platform.sandefjord.kodehode.larsgunnar.no~~
 
 ### Initial Infrastructure Setup
+
+> [!NOTE]
+> **For reference only.** The public server is currently offline. These instructions are provided for future provisioning or for setting up your own infrastructure.
 
 For platform/infrastructure teams provisioning environments (one-time setup):
 
@@ -161,7 +171,7 @@ The `publish-oci-manifests.yml` workflow automatically:
 - Publishes to GitHub Container Registry: `ghcr.io/<owner>/<service-name>`
 - Tags: `latest`, branch name, and commit SHA
 
-Built images are automatically used when environments reconcile via the compose files in `infrastructure/environments/`.
+Built images are automatically used when environments reconcile via the compose files in `infrastructure/environments/`. (Note: Public server is currently offline, but images are still built and published for local development and future deployments.)
 
 ## Example Services
 
